@@ -1,4 +1,4 @@
-# 物件導向程式設計(Object-Oriented Programming)
+# 資料庫基本概念
 
 ## 資料、資訊、資料處理
 | 名詞 | 定義 |
