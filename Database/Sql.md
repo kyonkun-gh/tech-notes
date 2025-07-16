@@ -1,0 +1,8 @@
+# 結構化查詢語言(SQL)
+
+## SQL 四大指令分類
+- **DDL（資料定義語言）**：CREATE, ALTER, DROP, TRUNCATE, RENAME, COMMENT
+- **DML（資料操作語言）**：SELECT, INSERT, UPDATE, DELETE
+- **DCL（資料控制語言）**：GRANT, REVOKE
+- **TCL（交易控制語言）**：COMMIT, ROLLBACK, SAVEPOINT
+
