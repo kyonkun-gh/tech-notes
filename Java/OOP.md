@@ -38,6 +38,7 @@ class Hello {
 ```Java
 class Animal {
 }
+
 class Dog extends Animal {  // Dog使用 extends關鍵字繼承父類別 (Animal)
 }
 ```
@@ -49,6 +50,7 @@ class Animal {
 		System.out.println("move");
 	}
 }
+
 class Dog extends Animal {
     @Override               // 不是必要，有寫的話，編譯器會檢查
 	public void move() {    // 子類別重新覆寫父類別 move方法
@@ -64,12 +66,14 @@ class Animal {
 		System.out.println("move");
 	}
 }
+
 class Dog extends Animal {
 	@Override
     public void move() {
 		System.out.println("run");
 	}
 }
+
 class Bird extends Animal {
     @Override
 	public void move() {
