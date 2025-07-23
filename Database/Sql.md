@@ -7,6 +7,83 @@
 - **TCL（交易控制語言）**：COMMIT, ROLLBACK, SAVEPOINT
 
 
+## CTE(Common Table Expression)
+- 練習：[602. Friend Requests II: Who Has the Most Friends](https://leetcode.com/problems/friend-requests-ii-who-has-the-most-friends/)
+
+- 題目：找出最多朋友的ID
+
+- 語法解釋：將 requester_id 與 accepter_id union，並產生一個表 ids，這個不是臨時表，所以不會寫入資料庫的 Temp
+```sql
+WITH ids AS (
+    SELECT requester_id as id 
+    FROM RequestAccepted
+    UNION ALL
+    SELECT accepter_id as id 
+    FROM RequestAccepted
+)
+```
+
+- 部分 sql執行結果：
+```sql
+WITH ids AS (
+    SELECT 
+        requester_id as id 
+    FROM 
+        RequestAccepted
+    UNION ALL
+    SELECT 
+        accepter_id as id 
+    FROM 
+        RequestAccepted
+)
+SELECT 
+    id,
+FROM 
+    ids
+```
+
+| ID |
+| -- |
+| 1  |
+| 1  |
+| 2  |
+| 3  |
+| 2  |
+| 3  |
+| 3  |
+| 4  |
+
+- 範例答案：
+```sql
+WITH ids AS (
+    SELECT 
+        requester_id as id 
+    FROM 
+        RequestAccepted
+    UNION ALL
+    SELECT 
+        accepter_id as id 
+    FROM 
+        RequestAccepted
+)
+SELECT 
+    id, 
+    num 
+FROM (
+    SELECT 
+        id, 
+        COUNT(1) AS num, 
+        RANK() OVER (ORDER BY COUNT(1) DESC) AS rank
+    FROM 
+        ids
+    GROUP BY 
+        id
+) sub 
+WHERE 
+    rank = 1;
+```
+
+
 ## 視窗函數(Windows Function)
 
 排名
@@ -24,10 +101,12 @@ ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY event_date) as num
 
 - 部分 sql執行結果：
 ```sql
-SELECT player_id, 
-       event_date, 
-       ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY event_date) as num
-FROM Activity;
+SELECT 
+    player_id, 
+    event_date, 
+    ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY event_date) as num 
+FROM 
+    Activity;
 ```
 
 | PLAYER_ID | EVENT_DATE          | NUM |
@@ -40,14 +119,18 @@ FROM Activity;
 
 - 範例答案：
 ```sql
-SELECT player_id, 
-       TO_CHAR(event_date, 'YYYY-MM-DD') as first_login 
+SELECT 
+    player_id, 
+    TO_CHAR(event_date, 'YYYY-MM-DD') as first_login 
 FROM (
-    SELECT player_id, 
-           event_date, 
-           ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY event_date) as num
-    FROM Activity
-) WHERE num = 1;
+    SELECT 
+        player_id, 
+        event_date, 
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY event_date) as num 
+    FROM 
+        Activity 
+) WHERE 
+    num = 1;
 ```
 
 
@@ -64,12 +147,15 @@ RANK() OVER (PARTITION BY Department.id ORDER BY Employee.salary DESC) as rank
 
 - 部分 sql執行結果：
 ```sql
-SELECT d.name, 
-       e.name, 
-       e.salary, 
-       RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank 
-FROM Department d 
-JOIN Employee e ON d.id = e.departmentId;
+SELECT 
+    d.name, 
+    e.name, 
+    e.salary, 
+    RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank 
+FROM 
+    Department d 
+JOIN 
+    Employee e ON d.id = e.departmentId;
 ```
 
 | NAME  | NAME  | SALARY | RANK          |
@@ -82,18 +168,23 @@ JOIN Employee e ON d.id = e.departmentId;
 
 - 範例答案：
 ```sql
-SELECT sub.dName as Department, 
-       sub.eName as Employee, 
-       sub.eSalary as Salary 
+SELECT 
+    sub.dName as Department, 
+    sub.eName as Employee, 
+    sub.eSalary as Salary 
 FROM (
-    SELECT d.name as dName, 
-           e.name as eName, 
-           e.salary as eSalary, 
-           RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank 
-    FROM Department d 
-    JOIN Employee e ON d.id = e.departmentId
+    SELECT 
+        d.name as dName, 
+        e.name as eName, 
+        e.salary as eSalary, 
+        RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank 
+    FROM 
+        Department d 
+    JOIN 
+        Employee e ON d.id = e.departmentId
 ) sub
-WHERE RANK = 1;
+WHERE 
+    RANK = 1;
 ```
 
 
@@ -110,12 +201,15 @@ DENSE_RANK() OVER (PARTITION BY Department.id ORDER BY Employee.salary DESC) as 
 
 - 部分 sql執行結果：
 ```sql
-SELECT d.name as dName, 
-       e.name as eName, 
-       e.salary as eSalary, 
-       DENSE_RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank
-FROM Department d 
-JOIN Employee E ON d.id = e.departmentId;
+SELECT 
+    d.name as dName, 
+    e.name as eName, 
+    e.salary as eSalary, 
+    DENSE_RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank
+FROM 
+    Department d 
+JOIN 
+    Employee E ON d.id = e.departmentId;
 ```
 
 | DNAME | ENAME | ESALARY | RANK            |
@@ -130,18 +224,23 @@ JOIN Employee E ON d.id = e.departmentId;
 
 - 範例答案：
 ```sql
-SELECT sub.dName as Department, 
-       sub.eName as Employee, 
-       sub.eSalary as Salary 
+SELECT 
+    sub.dName as Department, 
+    sub.eName as Employee, 
+    sub.eSalary as Salary 
 FROM (
-    SELECT d.name as dName, 
-           e.name as eName, 
-           e.salary as eSalary, 
-           DENSE_RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank
-    FROM Department d 
-    JOIN Employee E ON d.id = e.departmentId
+    SELECT 
+        d.name as dName, 
+        e.name as eName, 
+        e.salary as eSalary, 
+        DENSE_RANK() OVER (PARTITION BY d.id ORDER BY e.salary DESC) as rank
+    FROM 
+        Department d 
+    JOIN 
+        Employee E ON d.id = e.departmentId
 ) sub
-WHERE rank <= 3;
+WHERE 
+    rank <= 3;
 ```
 
 
@@ -157,3 +256,42 @@ WHERE rank <= 3;
 
 首尾比對
 ---
+
+
+## 其他
+
+### 多欄位組成唯一值
+- 練習：[585. Investments in 2016](https://leetcode.com/problems/investments-in-2016/)
+
+- 題目：找出 tiv_2015相同，且 (lat, lon)必須唯一，最後加總 tiv_2016
+
+- 語法解釋：可以將欄位組合起來，這樣就可以挑出唯一的 (lat, lon)
+```sql
+(lat, lon) IN (
+       SELECT lat, lon
+       FROM insurance
+       GROUP BY lat, lon
+       HAVING COUNT(*) = 1
+);
+```
+
+- 範例答案：
+```sql
+SELECT 
+    ROUND(SUM(tiv_2016), 2) AS tiv_2016 
+FROM 
+    insurance
+WHERE 
+    tiv_2015 IN (
+        SELECT tiv_2015
+        FROM insurance
+        GROUP BY tiv_2015
+        HAVING COUNT(*) > 1
+    )
+    AND (lat, lon) IN (
+        SELECT lat, lon
+        FROM insurance
+        GROUP BY lat, lon
+        HAVING COUNT(*) = 1
+    );
+```
