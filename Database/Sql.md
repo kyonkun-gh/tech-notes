@@ -295,3 +295,95 @@ WHERE
         HAVING COUNT(*) = 1
     );
 ```
+
+
+### Extra
+
+- Question：Given 3 tables, write an SQL query to list each customer’s latest order details, including the customer name, order ID, order time, and product name.
+
+Table: Customers
+| column        |
+| ------------- |
+| customer_id   |
+| name          |
+
+Table: Orders
+| column        |
+| ------------- |
+| order_id      |
+| customer_id   |
+| product_id    |
+| order_time    |
+
+Table: Products
+| column        |
+| ------------- |
+| product_id    |
+| product_name  |
+| product_price |
+
+- Sample Answer：
+```sql
+SELECT 
+    C.name, 
+    sub2.order_id, 
+    sub2.order_time, 
+    P.product_name 
+FROM 
+    Customers C 
+INNER JOIN (
+    SELECT 
+        O.customer_id, 
+        O.order_id, 
+        O.product_id, 
+        O.order_time 
+    FROM 
+        Orders O 
+    INNER JOIN (
+        SELECT 
+            customer_id, 
+            MAX(order_time) AS order_time 
+        FROM 
+            Orders 
+        GROUP BY 
+            customer_id 
+    ) sub1 
+    ON 
+        O.customer_id = sub1.customer_id AND 
+        O.order_time = sub1.order_time
+) sub2 
+ON
+    C.customer_id = sub2.customer_id 
+INNER JOIN 
+    Products P 
+ON 
+    sub2.product_id = P.product_id
+```
+
+- Sample Answer(Window Function)：
+```sql
+SELECT 
+    sub.name, 
+    sub.order_id, 
+    sub.order_time, 
+    sub.product_name 
+FROM (
+    SELECT 
+        C.name as name, 
+        O.order_id as order_id, 
+        O.order_time as order_time, 
+        P.product_name as product_name, 
+        ROW_NUMBER() OVER (PARTITION BY C.customer_id ORDER BY O.order_time DESC) as rn 
+    FROM Customers C 
+    INNER JOIN 
+        Orders O 
+    ON 
+        C.customer_id = O.customer_id 
+    INNER JOIN 
+        Products P 
+    ON 
+        O.product_id = P.product_id
+) sub 
+WHERE 
+    rn = 1;
+```
